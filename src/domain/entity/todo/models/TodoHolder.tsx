@@ -1,17 +1,16 @@
-import TodoResult from "../../../structures/TodoResult"
+import TodoStructure from "../../../structures/TodoStructure"
 import { TodoListener } from "./TodoListener"
 
 export default class TodoHolder {
     private todoListeners: TodoListener[]
-    public todoList: Array<TodoResult>
+    public todoList: Array<TodoStructure>
 
     constructor() {
         this.todoListeners = []
         this.todoList = []
     }
 
-    onGetAll(todos: Array<TodoResult>): void {
-        console.log(todos)
+    onTodoListChange(todos: Array<TodoStructure>): void {
         this.todoList = todos
         this.notifyListeners()
     }

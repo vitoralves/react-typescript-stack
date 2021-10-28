@@ -1,23 +1,23 @@
 import { Component } from 'react'
-import { Container, Header, Table, Button } from 'semantic-ui-react'
+import { Container, Header, Table, Button, Icon } from 'semantic-ui-react'
 import TodoViewModel from '../../view-model/todo/TodoViewModel'
 import BaseView from '../BaseView'
 
-export interface TodoProps {
+export interface ListTodosProps {
     todoViewModel: TodoViewModel
 }
 
-export interface TodoState {
+export interface ListTodosState {
     todoList: Array<any>
-    errorMessage: string
+    errorMessage: Array<String>
     showErrorMessage: boolean
 }
 
-export default class Todo extends Component<TodoProps, TodoState> implements BaseView {
+export default class ListTodos extends Component<ListTodosProps, ListTodosState> implements BaseView {
 
     private todoViewModel: TodoViewModel
 
-    public constructor(props: TodoProps) {
+    public constructor(props: ListTodosProps) {
         super(props)
 
         const { todoViewModel } = this.props
@@ -45,7 +45,10 @@ export default class Todo extends Component<TodoProps, TodoState> implements Bas
     }
 
     render(): JSX.Element {
-        console.log(this.todoViewModel.todoList)
+        const {
+            todoList
+        } = this.state
+
         return (
             <Container>
                 <Header as="h2">Todo List</Header>
@@ -60,11 +63,15 @@ export default class Todo extends Component<TodoProps, TodoState> implements Bas
                     </Table.Header>
 
                     <Table.Body>
-                        <Table.Row>
-                            <Table.Cell>Title 1</Table.Cell>
-                            <Table.Cell>Description 1</Table.Cell>
-                            <Table.Cell>True</Table.Cell>
-                        </Table.Row>
+                        {todoList.map(todo => {
+                            return <Table.Row key={todo.title}>
+                                <Table.Cell>{todo.title}</Table.Cell>
+                                <Table.Cell>{todo.description}</Table.Cell>
+                                <Table.Cell>
+                                    <Icon name={todo.finished ? 'check circle' : 'delete'} />
+                                </Table.Cell>
+                            </Table.Row>
+                        })}
                     </Table.Body>
                 </Table>
             </Container>

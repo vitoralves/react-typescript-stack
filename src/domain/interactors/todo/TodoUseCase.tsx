@@ -1,5 +1,6 @@
 import TodoHolder from "../../entity/todo/models/TodoHolder";
 import TodoRepository from "../../repository/todo/TodoRepository";
+import TodoStructure from "../../structures/TodoStructure";
 
 export default class TodoUseCase {
     private todoRepository: TodoRepository
@@ -12,6 +13,11 @@ export default class TodoUseCase {
 
     public async getAll(): Promise<void> {
         const todos = await this.todoRepository.getAllTodo()
-        this.todoHolder.onGetAll(todos)
+        this.todoHolder.onTodoListChange(todos)
+    }
+
+    public async addTodo(todo: TodoStructure): Promise<void> {
+        const todos = await this.todoRepository.addTodo(todo)
+        this.todoHolder.onTodoListChange(todos)
     }
 }
