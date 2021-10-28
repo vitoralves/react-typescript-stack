@@ -4,14 +4,25 @@ import { TodoListener } from "./TodoListener"
 export default class TodoHolder {
     private todoListeners: TodoListener[]
     public todoList: Array<TodoStructure>
+    public todo: TodoStructure
 
     constructor() {
         this.todoListeners = []
         this.todoList = []
+        this.todo = {
+            title: '',
+            description: '',
+            finished: false
+        }
     }
 
     onTodoListChange(todos: Array<TodoStructure>): void {
         this.todoList = todos
+        this.notifyListeners()
+    }
+
+    onTodoValueUpdate(todo: TodoStructure): void {
+        this.todo = todo
         this.notifyListeners()
     }
 

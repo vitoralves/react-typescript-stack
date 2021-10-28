@@ -7,39 +7,50 @@ import TodoViewModel from "./TodoViewModel";
 
 export default class TodoViewModelImpl implements TodoViewModel, TodoListener {
 
-    public errorMessage: Array<string>
-    public showErrorMessage: boolean
-
-    public todo: any
-    public todoList: Array<any>
     private baseView?: BaseView
-
     private todoUseCase: TodoUseCase
     private todoHolder: TodoHolder
 
+    public messagesList: Array<string>
+    public showMessages: boolean
+    public messageType: string
+    public isEditing: boolean
+
+    public todo: any
+    public todoList: Array<any>
+
+
     public constructor(todoUseCase: TodoUseCase, todoHolder: TodoHolder) {
         this.todoList = []
-        this.errorMessage = []
-        this.showErrorMessage = false
+        this.messagesList = []
+        this.showMessages = false
+        this.messageType = ''
         this.todoUseCase = todoUseCase
         this.todoHolder = todoHolder
-        this.todo = { finished: false }
+        this.isEditing = false
+        this.todo = {
+            title: '',
+            description: '',
+            finished: false
+        }
 
         this.todoHolder.addTodoListener(this)
     }
 
     public onTodoChange(): void {
         this.todoList = this.todoHolder.todoList
+        this.todo = this.todoHolder.todo
     }
 
     onSearchClick = async () => {
         try {
             await this.todoUseCase.getAll()
-            this.showErrorMessage = false
-            this.errorMessage = []
+            this.showMessages = false
+            this.messagesList = []
         } catch (error: any) {
-            this.showErrorMessage = true
-            this.errorMessage = error.message
+            this.showMessages = true
+            this.messageType = 'error'
+            this.messagesList = error.message
         } finally {
             this.notifiViewAboutChanges()
         }
@@ -49,12 +60,48 @@ export default class TodoViewModelImpl implements TodoViewModel, TodoListener {
         if (!this.validateTodoBeforeSubmit()) {
             try {
                 await this.todoUseCase.addTodo(this.todo)
-                this.showErrorMessage = false
-                this.errorMessage = []
+                this.todo = {}
+                window.history.back()
             } catch (error: any) {
-                this.showErrorMessage = true
-                this.errorMessage = error.message
+                this.messageType = 'error'
+                this.showMessages = true
+                this.messagesList = error.message
             }
+        } else {
+            this.messageType = 'error'
+            this.notifiViewAboutChanges()
+        }
+    }
+
+    onEditTodoSubmit = async () => {
+        if (!this.validateTodoBeforeSubmit()) {
+            try {
+                await this.todoUseCase.updateTodo(this.todo)
+                this.todo = {}
+                window.history.back()
+            } catch (error: any) {
+                console.log(error)
+                this.messageType = 'error'
+                this.showMessages = true
+                this.messagesList = error.message
+            }
+        } else {
+            this.messageType = 'error'
+            this.notifiViewAboutChanges()
+        }
+    }
+
+    editTodo = async (id: number) => {
+        try {
+            this.isEditing = true
+            await this.todoUseCase.getById(id)
+        } catch (error: any) {
+            console.log(error)
+            this.messageType = 'error'
+            this.showMessages = true
+            this.messagesList.push(error.message)
+        } finally {
+            this.notifiViewAboutChanges()
         }
     }
 
@@ -69,18 +116,18 @@ export default class TodoViewModelImpl implements TodoViewModel, TodoListener {
     }
 
     validateTodoBeforeSubmit = () => {
-        this.showErrorMessage = false
-        this.errorMessage = []
+        this.showMessages = false
+        this.messagesList = []
         if (!this.todo.title || this.todo.title.length < 3) {
-            this.errorMessage.push('Título deve ter no mímino 3 caracteres')
-            this.showErrorMessage = true
+            this.messagesList.push('Título deve ter no mímino 3 caracteres')
+            this.showMessages = true
         }
         if (!this.todo.description || this.todo.description.length < 10) {
-            this.errorMessage.push('Descrição deve ter no mímino 10 caracteres')
-            this.showErrorMessage = true
+            this.messagesList.push('Descrição deve ter no mímino 10 caracteres')
+            this.showMessages = true
         }
 
-        return this.showErrorMessage
+        return this.showMessages
     }
 
     public attachView = (baseView: BaseView): void => {

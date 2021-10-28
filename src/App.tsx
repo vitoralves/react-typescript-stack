@@ -8,7 +8,7 @@ import TodoHolder from './domain/entity/todo/models/TodoHolder'
 import TodoApi from './data/TodoApi'
 import { Route, BrowserRouter as Router, Switch, Link } from 'react-router-dom'
 import { Menu } from 'semantic-ui-react'
-import AddTodo from './presentation/view/todo/TodoForm'
+import TodoForm from './presentation/view/todo/TodoForm'
 
 interface AppProps {
 
@@ -63,7 +63,8 @@ export default class App extends Component<AppProps, AppState> {
 
           <Switch>
             <Route exact path="/" render={props => <ListTodos {...props} todoViewModel={this.todoViewModel} />} />
-            <Route exact path="/new" render={props => <AddTodo {...props} todoViewModel={this.todoViewModel} />} />
+            <Route exact path="/new" render={props => <TodoForm {...props} todoViewModel={this.todoViewModel} />} />
+            <Route exact path="/edit/:id" render={props => <TodoForm {...props} todoViewModel={this.todoViewModel} />} />
           </Switch>
         </div>
       </Router>

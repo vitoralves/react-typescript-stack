@@ -17,7 +17,15 @@ export default class TodoUseCase {
     }
 
     public async addTodo(todo: TodoStructure): Promise<void> {
-        const todos = await this.todoRepository.addTodo(todo)
-        this.todoHolder.onTodoListChange(todos)
+        await this.todoRepository.addTodo(todo)
+    }
+
+    public async getById(id: number): Promise<void> {
+        const todo = await this.todoRepository.getById(id)
+        this.todoHolder.onTodoValueUpdate(todo)
+    }
+
+    public async updateTodo(todo: TodoStructure): Promise<void> {
+        await this.todoRepository.updateTodo(todo)
     }
 }

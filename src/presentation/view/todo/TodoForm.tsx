@@ -1,17 +1,21 @@
 import React, { Component } from 'react'
-import TodoStructure from '../../../domain/structures/TodoStructure';
 import TodoViewModel from '../../view-model/todo/TodoViewModel';
 import { Container, Form, Header, Message } from 'semantic-ui-react'
 import BaseView from '../BaseView';
 
 export interface AddTodoProps {
     todoViewModel: TodoViewModel
+    match: {
+        params: any
+    }
 }
 
 export interface AddTodoState {
-    todo: TodoStructure,
-    errorMessage: Array<string>,
-    showErrorMessage: boolean,
+    todo: any,
+    messagesList: Array<string>,
+    showMessages: boolean,
+    messageType: string,
+    isEditing: boolean,
 }
 
 export default class TodoForm extends Component<AddTodoProps, AddTodoState> implements BaseView {
@@ -25,12 +29,17 @@ export default class TodoForm extends Component<AddTodoProps, AddTodoState> impl
 
         this.state = {
             todo: todoViewModel.todo,
-            errorMessage: todoViewModel.errorMessage,
-            showErrorMessage: todoViewModel.showErrorMessage,
+            messagesList: todoViewModel.messagesList,
+            showMessages: todoViewModel.showMessages,
+            messageType: todoViewModel.messageType,
+            isEditing: todoViewModel.isEditing
         }
     }
 
     public componentDidMount(): void {
+        if (this.props.match.params.id) {
+            this.todoViewModel.editTodo(this.props.match.params.id)
+        }
         this.todoViewModel.attachView(this)
     }
 
@@ -46,17 +55,17 @@ export default class TodoForm extends Component<AddTodoProps, AddTodoState> impl
 
     render(): JSX.Element {
         const {
-            todo
+            todo,
         } = this.state
-
+        console.log('TodoForm render')
         return (
             <Container>
                 <Header as='h2' content={`${todo.id ? `Editando Todo ${todo.id}` : 'Cadastro de Todo'}`} />
                 {
-                    this.todoViewModel.showErrorMessage &&
-                    <Message error>
-                        <Message.Header>Validações</Message.Header>
-                        {this.todoViewModel.errorMessage.map(m => (<p>{m}</p>))}
+                    this.todoViewModel.showMessages &&
+                    <Message color={this.todoViewModel.messageType === 'error' ? 'red' : 'green'}>
+                        <Message.Header>{this.todoViewModel.messageType === 'error' ? 'Validações' : 'Sucesso'}</Message.Header>
+                        {this.todoViewModel.messagesList.map(m => (<p>{m}</p>))}
                     </Message>
                 }
 
@@ -67,7 +76,7 @@ export default class TodoForm extends Component<AddTodoProps, AddTodoState> impl
                             label='Título'
                             placeholder='Insira um título'
                             id='title'
-                            content={todo.title}
+                            value={todo.title}
                             onChange={this.todoViewModel.onInputFieldChange}
                         />
                         <Form.Checkbox
@@ -87,7 +96,10 @@ export default class TodoForm extends Component<AddTodoProps, AddTodoState> impl
                     />
                     <Form.Button
                         type='button'
-                        onClick={this.todoViewModel.onAddTodoSubmit}
+                        onClick={
+                            todo.id ?
+                                this.todoViewModel.onEditTodoSubmit :
+                                this.todoViewModel.onAddTodoSubmit}
                         floated='right'
                     >
                         {todo.id ? 'Alterar' : 'Inserir'}
